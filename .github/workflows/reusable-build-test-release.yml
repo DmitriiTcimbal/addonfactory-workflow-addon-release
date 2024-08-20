@@ -78,7 +78,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   setup-workflow:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       execute-knowledge-labeled: ${{ steps.configure-tests-on-labels.outputs.execute_knowledge_labeled }}
       execute-ui-labeled: ${{ steps.configure-tests-on-labels.outputs.execute_ui_labeled }}
@@ -165,7 +165,7 @@ jobs:
   validate-pr-title:
     name: Validate PR title
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: read
@@ -180,7 +180,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
   meta:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       matrix_supportedSplunk: ${{ steps.matrix.outputs.supportedSplunk }}
       matrix_latestSplunk: ${{ steps.matrix.outputs.latestSplunk }}
@@ -199,7 +199,7 @@ jobs:
         uses: splunk/addonfactory-test-matrix-action@v2.1
 
   fossa-scan:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       - name: run fossa analyze and create report
@@ -217,7 +217,7 @@ jobs:
 
   fossa-test:
     continue-on-error: true
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - fossa-scan
     steps:
@@ -231,7 +231,7 @@ jobs:
 
   compliance-copyrights:
     name: compliance-copyrights
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -239,7 +239,7 @@ jobs:
         uses: fsfe/reuse-action@v1.1
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -249,7 +249,7 @@ jobs:
 
   review_secrets:
     name: security-detect-secrets
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout
         if: github.event_name != 'pull_request'
@@ -271,7 +271,7 @@ jobs:
           version: 3.77.0
           
   semgrep:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     name: security-sast-semgrep
     container:
       image: returntocorp/semgrep
@@ -284,7 +284,7 @@ jobs:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_PUBLISH_TOKEN }}
 
   test-inventory:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # Map a step output to a job output
     outputs:
       unit: ${{ steps.testset.outputs.unit }}
@@ -313,7 +313,7 @@ jobs:
   run-unit-tests:
     name: test-unit-python3-${{ matrix.python-version }}
     if: ${{ needs.test-inventory.outputs.unit == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - test-inventory
     strategy:
@@ -364,7 +364,7 @@ jobs:
   run-unit-tests-3_9:
     name: test-unit-python3-${{ matrix.python-version }}
     if: ${{ needs.test-inventory.outputs.unit == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - test-inventory
     strategy:
@@ -413,7 +413,7 @@ jobs:
           path: test-results/*
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - setup-workflow
       - test-inventory
@@ -600,7 +600,7 @@ jobs:
         if: ${{ !cancelled() }}
 
   build-3_9:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - setup-workflow
       - test-inventory
@@ -706,7 +706,7 @@ jobs:
           version: ${{ steps.BuildVersion.outputs.VERSION }}
 
   run-requirements-unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - build
       - test-inventory
@@ -740,7 +740,7 @@ jobs:
     name: quality-appinspect-${{ matrix.tags }}
     needs: build
     if: ${{ !cancelled() && needs.build.result == 'success' }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -786,7 +786,7 @@ jobs:
       !cancelled() &&
       needs.build.result == 'success' &&
       ( github.base_ref == 'main' || github.ref_name == 'main' )
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -817,7 +817,7 @@ jobs:
       - build
       - test-inventory
     if: ${{ !cancelled() && needs.build.result == 'success' }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       argo-server: ${{ steps.test-setup.outputs.argo-server }}
       argo-http1: ${{ steps.test-setup.outputs.argo-http1 }}
@@ -918,7 +918,7 @@ jobs:
       - setup
       - meta
       - setup-workflow
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -1151,7 +1151,7 @@ jobs:
       - setup
       - meta
       - setup-workflow
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -1362,7 +1362,7 @@ jobs:
       - setup
       - meta
       - setup-workflow
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -1595,7 +1595,7 @@ jobs:
       - setup
       - meta
       - setup-workflow
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -1826,7 +1826,7 @@ jobs:
       - setup
       - meta
       - setup-workflow
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -2064,7 +2064,7 @@ jobs:
       - run-modinput-tests
       - run-ui-tests
       - validate-pr-title
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       NEEDS: ${{ toJson(needs) }}
     steps:
@@ -2089,7 +2089,7 @@ jobs:
     if: ${{ !cancelled() && needs.pre-publish.result == 'success' && github.event_name != 'pull_request' && github.event_name != 'schedule' }}
     needs:
       - pre-publish
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: write
       packages: read
